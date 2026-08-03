@@ -110,20 +110,48 @@ Navigate to **http://localhost:3000** in your browser.
 
 ## 🐧 Armbian / Linux Deployment
 
-Deploy CloudNest as a background `systemd` service with a single command:
+Deploy CloudNest as a background `systemd` service with a single command.
+
+### Prerequisites
+
+Node.js (v18+) and npm must already be installed — either system-wide or via a version manager (nvm, fnm, n, etc.).
+
+### Standard Deploy
 
 ```bash
+git clone https://github.com/jnckcode/cloudnest.git
+cd cloudnest
 sudo chmod +x deploy-armbian.sh
 sudo ./deploy-armbian.sh
 ```
 
+### Deploy Directly to `/opt`
+
+If you clone the repo straight into `/opt/cloudnest`, the script will skip the copy step automatically:
+
+```bash
+sudo git clone https://github.com/jnckcode/cloudnest.git /opt/cloudnest
+cd /opt/cloudnest
+sudo chmod +x deploy-armbian.sh
+sudo ./deploy-armbian.sh
+```
+
+### Using with NVM
+
+When Node.js is managed by nvm, pass your `PATH` through to root:
+
+```bash
+sudo -E env "PATH=$PATH" ./deploy-armbian.sh
+```
+
 **What the script does:**
 
-1. Installs system dependencies (Node.js 20 LTS, SQLite, Nginx)
-2. Copies the project to `/opt/cloudnest`
-3. Creates a dedicated storage directory at `/var/cloudnest/storage`
-4. Registers and enables a `systemd` service
-5. Starts CloudNest on port `3000`
+1. Validates that `node` and `npm` are available in PATH
+2. Installs system dependency (`sqlite3`)
+3. Copies project to `/opt/cloudnest` (skipped if already there)
+4. Installs production npm dependencies
+5. Creates storage directory at `/var/cloudnest/storage`
+6. Registers and enables a `systemd` service on port `3000`
 
 ```bash
 # Manage the service
