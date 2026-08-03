@@ -10,3 +10,8 @@ logs/
 .DS_Store
 mock_storage/
 !README.md
+CURRENT_STATE.md
+promt.md
+WORKFLOW_GUIDELINES.md
+PHASE_HISTORY.md
+PROJECT_MAP.md
