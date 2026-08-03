@@ -1,0 +1,273 @@
+<!--
+  @file public/index.html
+  @description Single Page Application container for CloudNest Personal Cloud Storage with high-density layout and semantic structure.
+  @module FrontendHTML
+  @dependencies Google Fonts, FontAwesome 6
+  @author Agent Architecture Directive
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CloudNest - Personal Cloud Storage & File Manager</title>
+  <meta name="description" content="Lightweight, secure, high-performance personal cloud storage web application optimized for Armbian server architecture.">
+  <meta name="theme-color" content="#0f172a">
+  
+  <!-- Google Fonts: Inter & Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+</head>
+<body class="dark-theme">
+  <!-- Main App Root Container -->
+  <div id="app" class="app-layout">
+    
+    <!-- Sidebar Navigation -->
+    <aside id="sidebar" class="sidebar">
+      <div class="brand-header">
+        <div class="brand-logo">
+          <i class="fa-solid fa-cloud-bolt"></i>
+        </div>
+        <div class="brand-title">
+          <h1>CloudNest</h1>
+          <span class="badge-tag">Armbian OS</span>
+        </div>
+      </div>
+
+      <div class="sidebar-actions">
+        <button id="btn-upload" class="btn btn-primary btn-block">
+          <i class="fa-solid fa-cloud-arrow-up"></i>
+          <span>Upload Files</span>
+        </button>
+        <button id="btn-new-folder" class="btn btn-secondary btn-block">
+          <i class="fa-solid fa-folder-plus"></i>
+          <span>New Folder</span>
+        </button>
+      </div>
+
+      <!-- Navigation Menu -->
+      <nav class="sidebar-nav">
+        <div class="nav-section-title">Navigation</div>
+        <a href="#" class="nav-item active" data-view="all">
+          <i class="fa-solid fa-hard-drive"></i>
+          <span>All Storage</span>
+        </a>
+        <a href="#" class="nav-item" data-view="recent">
+          <i class="fa-solid fa-clock-rotate-left"></i>
+          <span>Recent Files</span>
+        </a>
+        <a href="#" class="nav-item" data-view="shared">
+          <i class="fa-solid fa-share-nodes"></i>
+          <span>Shared Links</span>
+        </a>
+      </nav>
+
+      <!-- Mounted Storage Devices Section -->
+      <div class="storage-section">
+        <div class="nav-section-title">Storage Devices</div>
+        <div id="storage-drives-list" class="drives-container">
+          <div class="drive-skeleton">Loading drives...</div>
+        </div>
+      </div>
+
+      <!-- Footer Info -->
+      <div class="sidebar-footer">
+        <div class="system-status">
+          <span class="status-dot online"></span>
+          <span id="system-status-text">Armbian Node Online</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Workspace Content Area -->
+    <main id="main-content" class="main-content">
+      
+      <!-- Top Navigation & Header Controls -->
+      <header id="top-bar" class="top-bar">
+        <!-- Breadcrumb Navigation -->
+        <nav id="breadcrumb" class="breadcrumb-container" aria-label="Breadcrumb">
+          <button class="breadcrumb-item home-btn" data-path="">
+            <i class="fa-solid fa-house"></i>
+          </button>
+          <span class="breadcrumb-separator"><i class="fa-solid fa-chevron-right"></i></span>
+          <span class="breadcrumb-current">Storage Root</span>
+        </nav>
+
+        <!-- Search & View Mode Toggles -->
+        <div class="top-bar-controls">
+          <div class="search-box">
+            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+            <input type="text" id="search-input" placeholder="Search files & folders..." autocomplete="off">
+            <button id="search-clear" class="btn-icon hidden"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+
+          <div class="view-toggles">
+            <button id="btn-view-grid" class="btn-icon active" title="Grid View">
+              <i class="fa-solid fa-border-all"></i>
+            </button>
+            <button id="btn-view-list" class="btn-icon" title="List View">
+              <i class="fa-solid fa-list"></i>
+            </button>
+          </div>
+
+          <button id="btn-refresh" class="btn-icon" title="Refresh List">
+            <i class="fa-solid fa-arrows-rotate"></i>
+          </button>
+        </div>
+      </header>
+
+      <!-- File Manager Viewport & Drag-and-Drop Target -->
+      <section id="viewport" class="viewport-area">
+        
+        <!-- Drag & Drop Overlay Indicator -->
+        <div id="dropzone-overlay" class="dropzone-overlay hidden">
+          <div class="dropzone-box">
+            <i class="fa-solid fa-cloud-arrow-up dropzone-icon"></i>
+            <h2>Drop files or folders here to upload</h2>
+            <p>Chunked parallel transfer will begin automatically</p>
+          </div>
+        </div>
+
+        <!-- File Items Container (Grid / List dynamically rendered) -->
+        <div id="file-container" class="file-container grid-view">
+          <!-- Rendered dynamically by fileGrid.js -->
+        </div>
+
+        <!-- Empty State Placeholder -->
+        <div id="empty-state" class="empty-state hidden">
+          <div class="empty-icon"><i class="fa-solid fa-folder-open"></i></div>
+          <h3>This folder is empty</h3>
+          <p>Drag and drop files here or click "Upload Files" to begin</p>
+        </div>
+      </section>
+
+      <!-- Status Bar -->
+      <footer id="status-bar" class="status-bar">
+        <span id="status-item-count">0 items</span>
+        <span id="status-selected-count" class="hidden">0 selected</span>
+      </footer>
+    </main>
+  </div>
+
+  <!-- Custom Right-Click Context Menu -->
+  <div id="context-menu" class="context-menu hidden">
+    <ul>
+      <li data-action="open"><i class="fa-solid fa-folder-open"></i> Open</li>
+      <li data-action="preview"><i class="fa-solid fa-eye"></i> Preview</li>
+      <li data-action="download"><i class="fa-solid fa-download"></i> Download</li>
+      <li data-action="share"><i class="fa-solid fa-share-nodes"></i> Share Link</li>
+      <li class="menu-divider"></li>
+      <li data-action="rename"><i class="fa-solid fa-pen-to-square"></i> Rename</li>
+      <li data-action="copy"><i class="fa-solid fa-copy"></i> Copy</li>
+      <li data-action="move"><i class="fa-solid fa-file-export"></i> Move</li>
+      <li class="menu-divider"></li>
+      <li data-action="properties"><i class="fa-solid fa-circle-info"></i> Properties</li>
+      <li data-action="delete" class="danger"><i class="fa-solid fa-trash-can"></i> Delete</li>
+    </ul>
+  </div>
+
+  <!-- Universal Media Preview Modal -->
+  <div id="preview-modal" class="modal-backdrop hidden">
+    <div class="modal-dialog preview-dialog">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <i id="preview-file-icon" class="fa-solid fa-file"></i>
+          <h3 id="preview-filename">File Preview</h3>
+        </div>
+        <div class="modal-actions">
+          <button id="btn-preview-download" class="btn-icon" title="Download File">
+            <i class="fa-solid fa-download"></i>
+          </button>
+          <button id="btn-preview-close" class="btn-icon" title="Close Preview">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+      </div>
+      <div id="preview-body" class="modal-body preview-body">
+        <!-- Dynamic media player / document viewer inserted here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Item Properties Modal -->
+  <div id="properties-modal" class="modal-backdrop hidden">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-circle-info"></i> Item Properties</h3>
+        <button class="btn-icon close-modal"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <table class="properties-table">
+          <tr><th>Name:</th><td id="prop-name">-</td></tr>
+          <tr><th>Type:</th><td id="prop-type">-</td></tr>
+          <tr><th>Path:</th><td id="prop-path" class="path-cell">-</td></tr>
+          <tr><th>Size:</th><td id="prop-size">-</td></tr>
+          <tr><th>Modified:</th><td id="prop-modified">-</td></tr>
+          <tr><th>Permissions:</th><td id="prop-permissions">-</td></tr>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary close-modal">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Share Link Modal -->
+  <div id="share-modal" class="modal-backdrop hidden">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-share-nodes"></i> Share Link Generated</h3>
+        <button class="btn-icon close-modal"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <p>Anyone with this link can download or view this item:</p>
+        <div class="input-copy-group">
+          <input type="text" id="share-url-input" readonly>
+          <button id="btn-copy-share" class="btn btn-primary"><i class="fa-solid fa-copy"></i> Copy</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Upload Queue Drawer -->
+  <div id="upload-drawer" class="upload-drawer hidden">
+    <div class="upload-drawer-header">
+      <div class="drawer-title">
+        <i class="fa-solid fa-cloud-arrow-up"></i>
+        <span>Upload Queue</span>
+        <span id="upload-count-badge" class="badge">0</span>
+      </div>
+      <div class="drawer-actions">
+        <button id="btn-toggle-drawer" class="btn-icon"><i class="fa-solid fa-chevron-down"></i></button>
+        <button id="btn-close-drawer" class="btn-icon"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+    </div>
+    <div id="upload-queue-list" class="upload-queue-list">
+      <!-- Upload items dynamically appended -->
+    </div>
+  </div>
+
+  <!-- Hidden File Input for Picker -->
+  <input type="file" id="hidden-file-input" multiple class="hidden">
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Scripts -->
+  <script src="js/api.js"></script>
+  <script src="js/components/storageSidebar.js"></script>
+  <script src="js/components/fileGrid.js"></script>
+  <script src="js/components/contextMenu.js"></script>
+  <script src="js/components/previewModal.js"></script>
+  <script src="js/components/uploadManager.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
