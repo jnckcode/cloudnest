@@ -1,63 +1,172 @@
-# CloudNest ☁️
+<p align="center">
+  <img src="https://img.icons8.com/3d-fluency/94/cloud-storage.png" alt="CloudNest Logo" width="80"/>
+</p>
 
-Lightweight, Secure, Personal Cloud Storage Application optimized for Armbian & SBC servers.
+<h1 align="center">CloudNest</h1>
 
-## Features
+<p align="center">
+  <strong>Your Personal Cloud — Lightweight, Secure, Self-Hosted.</strong><br/>
+  A modern file management system built for Armbian &amp; single-board computers.
+</p>
 
-- **Chunked File Transfer & Resumable Uploads**: Upload large files seamlessly with automatic chunking and retry mechanism.
-- **Automated Storage Discovery**: Automatically detects mounted storage devices and system drives.
-- **Robust Security**: Built-in protection against path traversal, rate limiting, and security headers via Helmet.
-- **Glassmorphism UI**: Modern, responsive dashboard built with clean vanilla HTML, CSS, and JS.
-- **Armbian / SBC Optimized**: Minimal CPU & RAM footprint, ideal for single-board computers like Raspberry Pi or Orange Pi running Armbian.
-- **One-Command Deployment**: Includes automated deployment script (`deploy-armbian.sh`) for quick setup as a systemd service.
+<p align="center">
+  <a href="#-features"><img src="https://img.shields.io/badge/status-active-brightgreen?style=flat-square" alt="Status"></a>
+  <img src="https://img.shields.io/badge/node-%3E%3D18-339933?style=flat-square&logo=node.js&logoColor=white" alt="Node.js">
+  <img src="https://img.shields.io/badge/express-4.x-000000?style=flat-square&logo=express&logoColor=white" alt="Express">
+  <img src="https://img.shields.io/badge/sqlite-3-003B57?style=flat-square&logo=sqlite&logoColor=white" alt="SQLite">
+  <img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="License">
+</p>
 
-## Tech Stack
+<br/>
 
-- **Backend**: Node.js, Express, SQLite3
-- **Frontend**: Vanilla HTML5, CSS3 (Glassmorphism design system), ES6+ JavaScript
-- **Security**: Helmet, Express Rate Limit, Path Traversal Sanitation
+---
 
-## Getting Started
+## ✨ Features
+
+| Feature | Description |
+|:--------|:------------|
+| 📤 **Chunked & Resumable Uploads** | Handles large files with automatic 2 MB chunking, parallel transfer, and resume-on-failure |
+| 🔍 **Auto Storage Discovery** | Automatically detects `/media`, `/mnt`, and custom mount points on Linux systems |
+| 🛡️ **Security First** | Path traversal prevention, Helmet headers, CORS, and rate limiting out of the box |
+| 🎨 **Glassmorphism UI** | Premium dark-theme dashboard — zero frameworks, pure vanilla HTML / CSS / JS |
+| 📱 **Responsive Design** | Works seamlessly from desktop to mobile with adaptive grid & list views |
+| ⚡ **SBC Optimized** | Minimal memory footprint — runs smoothly on Raspberry Pi, Orange Pi, and similar boards |
+| 🔗 **Shareable Links** | Generate direct download links for any file with one click |
+| 📦 **One-Command Deploy** | Automated `systemd` service setup via `deploy-armbian.sh` |
+
+---
+
+## 🏗️ Architecture
+
+```
+cloudnest/
+├── public/                  # Frontend SPA
+│   ├── css/
+│   │   ├── main.css         # Design system & tokens
+│   │   └── components.css   # Component styles
+│   ├── js/
+│   │   ├── api.js           # API client layer
+│   │   ├── app.js           # Main application controller
+│   │   └── components/      # UI modules
+│   │       ├── fileGrid.js
+│   │       ├── contextMenu.js
+│   │       ├── previewModal.js
+│   │       ├── storageSidebar.js
+│   │       └── uploadManager.js
+│   └── index.html
+├── server/
+│   ├── index.js             # Express entry point
+│   ├── config.js            # Central configuration
+│   ├── db/                  # SQLite database layer
+│   ├── middleware/           # Security middleware
+│   ├── routes/              # API route handlers
+│   │   ├── files.js         # File operations (CRUD)
+│   │   ├── storage.js       # Storage device discovery
+│   │   └── upload.js        # Chunked upload endpoint
+│   ├── services/            # Business logic
+│   │   ├── fileService.js
+│   │   ├── chunkService.js
+│   │   └── storageService.js
+│   └── utils/
+│       └── portFinder.js
+├── deploy-armbian.sh        # One-click deployment script
+└── package.json
+```
+
+---
+
+## 🚀 Quick Start
 
 ### Prerequisites
 
-- Node.js (v18 or higher recommended)
-- npm
+- **Node.js** v18 or higher
+- **npm** (bundled with Node.js)
 
-### Installation
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/jnckcode/cloudnest.git
-   cd cloudnest
-   ```
-
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-
-3. Start the application:
-   ```bash
-   npm start
-   ```
-
-   For development with hot reload:
-   ```bash
-   npm run dev
-   ```
-
-4. Open your browser and navigate to `http://localhost:3000`.
-
-## Armbian / Linux Deployment
-
-To deploy CloudNest as a system service on Armbian or Linux:
+### 1 · Clone & Install
 
 ```bash
-chmod +x deploy-armbian.sh
-./deploy-armbian.sh
+git clone https://github.com/jnckcode/cloudnest.git
+cd cloudnest
+npm install
 ```
 
-## License
+### 2 · Run
 
-[MIT](LICENSE)
+```bash
+# Production
+npm start
+
+# Development (hot reload)
+npm run dev
+```
+
+### 3 · Open
+
+Navigate to **http://localhost:3000** in your browser.
+
+> On Windows, CloudNest automatically creates a `mock_storage/` directory with sample mount points for local testing.
+
+---
+
+## 🐧 Armbian / Linux Deployment
+
+Deploy CloudNest as a background `systemd` service with a single command:
+
+```bash
+sudo chmod +x deploy-armbian.sh
+sudo ./deploy-armbian.sh
+```
+
+**What the script does:**
+
+1. Installs system dependencies (Node.js 20 LTS, SQLite, Nginx)
+2. Copies the project to `/opt/cloudnest`
+3. Creates a dedicated storage directory at `/var/cloudnest/storage`
+4. Registers and enables a `systemd` service
+5. Starts CloudNest on port `3000`
+
+```bash
+# Manage the service
+sudo systemctl status cloudnest
+sudo systemctl restart cloudnest
+sudo journalctl -u cloudnest -f    # Live logs
+```
+
+---
+
+## 🔧 Configuration
+
+CloudNest is configured via **environment variables**:
+
+| Variable | Default | Description |
+|:---------|:--------|:------------|
+| `PORT` | `3000` | Server listen port |
+| `NODE_ENV` | — | Set to `production` for optimized mode |
+| `CLOUDNEST_STORAGE_ROOT` | `/var/cloudnest/storage` | Root path for file storage on Linux |
+
+---
+
+## 🧰 Tech Stack
+
+<table>
+  <tr>
+    <td align="center"><img src="https://img.icons8.com/color/48/nodejs.png" width="30"/><br/><sub>Node.js</sub></td>
+    <td align="center"><img src="https://img.icons8.com/ios/50/FFFFFF/express-js.png" width="30"/><br/><sub>Express</sub></td>
+    <td align="center"><img src="https://img.icons8.com/color/48/sql.png" width="30"/><br/><sub>SQLite3</sub></td>
+    <td align="center"><img src="https://img.icons8.com/color/48/html-5--v1.png" width="30"/><br/><sub>HTML5</sub></td>
+    <td align="center"><img src="https://img.icons8.com/color/48/css3.png" width="30"/><br/><sub>CSS3</sub></td>
+    <td align="center"><img src="https://img.icons8.com/color/48/javascript--v1.png" width="30"/><br/><sub>JavaScript</sub></td>
+  </tr>
+</table>
+
+---
+
+## 📄 License
+
+Distributed under the **MIT License**. See [`LICENSE`](LICENSE) for details.
+
+---
+
+<p align="center">
+  Built with ☁️ by <a href="https://github.com/jnckcode">jnckcode</a>
+</p>
