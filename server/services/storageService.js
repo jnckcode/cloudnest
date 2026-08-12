@@ -2,7 +2,7 @@
  * @file server/services/storageService.js
  * @description Automated system storage discovery service detecting mounted media devices and calculating available disk space.
  * @module StorageService
- * @dependencies fs, path, child_process, config
+ * @dependencies fs, path, child_process, config, settingsService
  * @author Agent Architecture Directive
  */
 
@@ -11,13 +11,15 @@ const fsp = fs.promises;
 const path = require('path');
 const { execFile } = require('child_process');
 const { IS_WINDOWS, ROOT_STORAGE_PATH, SYSTEM_MOUNT_POINTS } = require('../config');
+const settingsService = require('./settingsService');
 
 class StorageService {
   /**
    * Dynamically discover mounted drives and disk usage
    */
   async discoverDrives() {
-    const drives = [];
+    const hideRoot = await settingsService.getSetting('hide_root_storage');
+    let drives = [];
 
     if (IS_WINDOWS) {
       // Windows Mock Storage Discovery
@@ -46,46 +48,48 @@ class StorageService {
           });
         }
       }
+    } else {
+      // Armbian / Linux Dynamic Storage Discovery under /media and /mnt
+      // 1. Primary Root Storage
+      const rootUsage = await this._getLinuxDiskUsage(ROOT_STORAGE_PATH);
+      drives.push({
+        id: 'primary_root',
+        name: 'System Internal Storage',
+        path: ROOT_STORAGE_PATH,
+        type: 'root',
+        isMounted: true,
+        ...rootUsage
+      });
 
-      return drives;
-    }
-
-    // Armbian / Linux Dynamic Storage Discovery under /media and /mnt
-    // 1. Primary Root Storage
-    const rootUsage = await this._getLinuxDiskUsage(ROOT_STORAGE_PATH);
-    drives.push({
-      id: 'primary_root',
-      name: 'System Internal Storage',
-      path: ROOT_STORAGE_PATH,
-      type: 'root',
-      isMounted: true,
-      ...rootUsage
-    });
-
-    // 2. Scan /media and /mnt directories for mounts
-    const mountRoots = ['/media', '/mnt'];
-    for (const mountDir of mountRoots) {
-      if (fs.existsSync(mountDir)) {
-        try {
-          const entries = await fsp.readdir(mountDir, { withFileTypes: true });
-          for (const entry of entries) {
-            if (entry.isDirectory()) {
-              const fullPath = path.join(mountDir, entry.name);
-              const usage = await this._getLinuxDiskUsage(fullPath);
-              drives.push({
-                id: `mount_${entry.name}`,
-                name: `External Mount: ${entry.name}`,
-                path: fullPath,
-                type: mountDir.replace('/', ''),
-                isMounted: true,
-                ...usage
-              });
+      // 2. Scan /media and /mnt directories for mounts
+      const mountRoots = ['/media', '/mnt'];
+      for (const mountDir of mountRoots) {
+        if (fs.existsSync(mountDir)) {
+          try {
+            const entries = await fsp.readdir(mountDir, { withFileTypes: true });
+            for (const entry of entries) {
+              if (entry.isDirectory()) {
+                const fullPath = path.join(mountDir, entry.name);
+                const usage = await this._getLinuxDiskUsage(fullPath);
+                drives.push({
+                  id: `mount_${entry.name}`,
+                  name: `External Mount: ${entry.name}`,
+                  path: fullPath,
+                  type: mountDir.replace('/', ''),
+                  isMounted: true,
+                  ...usage
+                });
+              }
             }
+          } catch (e) {
+            console.warn(`[StorageService] Error reading ${mountDir}:`, e.message);
           }
-        } catch (e) {
-          console.warn(`[StorageService] Error reading ${mountDir}:`, e.message);
         }
       }
+    }
+
+    if (hideRoot) {
+      drives = drives.filter(d => d.type !== 'root' && d.id !== 'primary' && d.id !== 'primary_root');
     }
 
     return drives;

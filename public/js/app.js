@@ -339,7 +339,140 @@ document.addEventListener('DOMContentLoaded', () => {
     showToast('Share URL copied to clipboard');
   });
 
-  // Initial Boot
-  storageSidebar.render();
-  loadDirectory('');
+  // --- Auth Flow ---
+  const loginScreen = document.getElementById('login-screen');
+  const loginForm = document.getElementById('login-form');
+  const loginError = document.getElementById('login-error');
+
+  function showLoginScreen() {
+    loginScreen.classList.remove('hidden');
+  }
+
+  function hideLoginScreen() {
+    loginScreen.classList.add('hidden');
+  }
+
+  api.onUnauthorized = () => {
+    api.setToken('');
+    showLoginScreen();
+  };
+
+  loginForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const username = document.getElementById('login-username').value.trim();
+    const password = document.getElementById('login-password').value;
+    const btnLogin = document.getElementById('btn-login');
+
+    loginError.classList.add('hidden');
+    btnLogin.disabled = true;
+    btnLogin.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Signing In...';
+
+    try {
+      await api.login(username, password);
+      hideLoginScreen();
+      loginForm.reset();
+      bootApp();
+    } catch (err) {
+      loginError.textContent = err.message || 'Login failed';
+      loginError.classList.remove('hidden');
+    } finally {
+      btnLogin.disabled = false;
+      btnLogin.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> <span>Sign In</span>';
+    }
+  });
+
+  // Logout Button
+  document.getElementById('btn-logout').addEventListener('click', async () => {
+    if (confirm('Are you sure you want to sign out?')) {
+      await api.logout();
+      showToast('Signed out successfully');
+      showLoginScreen();
+    }
+  });
+
+  // --- Settings Modal ---
+  document.getElementById('btn-open-settings').addEventListener('click', async () => {
+    try {
+      const data = await api.getSettings();
+      const settings = data.settings || {};
+      document.getElementById('setting-hide-root').checked = !!settings.hide_root_storage;
+      document.getElementById('settings-modal').classList.remove('hidden');
+    } catch (err) {
+      showToast(err.message || 'Failed to load settings', 'error');
+    }
+  });
+
+  document.getElementById('btn-save-settings').addEventListener('click', async () => {
+    try {
+      const hideRoot = document.getElementById('setting-hide-root').checked;
+      await api.updateSettings({ hide_root_storage: hideRoot });
+      document.getElementById('settings-modal').classList.add('hidden');
+      showToast('Settings saved successfully');
+      storageSidebar.render();
+    } catch (err) {
+      showToast(err.message || 'Failed to save settings', 'error');
+    }
+  });
+
+  // --- Change Password Modal ---
+  document.getElementById('btn-open-change-pw').addEventListener('click', () => {
+    document.getElementById('settings-modal').classList.add('hidden');
+    document.getElementById('change-pw-modal').classList.remove('hidden');
+    document.getElementById('pw-error').classList.add('hidden');
+    document.getElementById('change-pw-form').reset();
+  });
+
+  document.getElementById('btn-submit-change-pw').addEventListener('click', async () => {
+    const currentPw = document.getElementById('pw-current').value;
+    const newPw = document.getElementById('pw-new').value;
+    const confirmPw = document.getElementById('pw-confirm').value;
+    const pwError = document.getElementById('pw-error');
+
+    pwError.classList.add('hidden');
+
+    if (newPw !== confirmPw) {
+      pwError.textContent = 'New passwords do not match';
+      pwError.classList.remove('hidden');
+      return;
+    }
+
+    if (newPw.length < 4) {
+      pwError.textContent = 'New password must be at least 4 characters';
+      pwError.classList.remove('hidden');
+      return;
+    }
+
+    try {
+      await api.changePassword(currentPw, newPw);
+      document.getElementById('change-pw-modal').classList.add('hidden');
+      showToast('Password updated successfully');
+    } catch (err) {
+      pwError.textContent = err.message || 'Failed to change password';
+      pwError.classList.remove('hidden');
+    }
+  });
+
+  // --- App Boot Logic ---
+  function bootApp() {
+    storageSidebar.render();
+    loadDirectory('');
+  }
+
+  async function checkSession() {
+    if (!api.token) {
+      showLoginScreen();
+      return;
+    }
+    try {
+      await api.getMe();
+      hideLoginScreen();
+      bootApp();
+    } catch (err) {
+      showLoginScreen();
+    }
+  }
+
+  // Initial Session Check
+  checkSession();
 });
+

@@ -15,7 +15,10 @@ const { PORT, ROOT_STORAGE_PATH, IS_WINDOWS } = require('./config');
 const { apiRateLimiter } = require('./middleware/security');
 const { findAvailablePort } = require('./utils/portFinder');
 
-// Import routes
+// Import middleware & routes
+const { authGuard } = require('./middleware/auth');
+const authRoutes = require('./routes/auth');
+const settingsRoutes = require('./routes/settings');
 const fileRoutes = require('./routes/files');
 const uploadRoutes = require('./routes/upload');
 const storageRoutes = require('./routes/storage');
@@ -43,10 +46,20 @@ app.use('/api/', apiRateLimiter);
 // Static Web App Frontend
 app.use(express.static(path.join(__dirname, '../public')));
 
-// Register API Endpoints
-app.use('/api/files', fileRoutes);
-app.use('/api/upload', uploadRoutes);
-app.use('/api/storage', storageRoutes);
+// Public Auth Endpoints
+app.use('/api/auth', authRoutes);
+
+// Protected API Endpoints (Require Valid Session Token)
+app.use('/api/settings', authGuard, settingsRoutes);
+app.use('/api/files', (req, res, next) => {
+  // Allow public access to shared download links without auth token
+  if (req.path.startsWith('/shared/')) {
+    return next();
+  }
+  return authGuard(req, res, next);
+}, fileRoutes);
+app.use('/api/upload', authGuard, uploadRoutes);
+app.use('/api/storage', authGuard, storageRoutes);
 
 // Fallback index.html for SPA routing
 app.get('*', (req, res) => {

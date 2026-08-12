@@ -132,6 +132,12 @@
           <button id="btn-refresh" class="btn-icon" title="Refresh List">
             <i class="fa-solid fa-arrows-rotate"></i>
           </button>
+          <button id="btn-open-settings" class="btn-icon" title="System Settings">
+            <i class="fa-solid fa-gear"></i>
+          </button>
+          <button id="btn-logout" class="btn-icon danger-icon" title="Logout Account">
+            <i class="fa-solid fa-right-from-bracket"></i>
+          </button>
         </div>
       </header>
 
@@ -271,6 +277,108 @@
 
   <!-- Toast Notification Container -->
   <div id="toast-container" class="toast-container"></div>
+
+  <!-- Login Screen Overlay -->
+  <div id="login-screen" class="login-screen">
+    <div class="login-card">
+      <div class="login-brand">
+        <div class="brand-logo login-logo">
+          <i class="fa-solid fa-cloud-bolt"></i>
+        </div>
+        <h1>CloudNest</h1>
+        <p class="login-subtitle">Personal Cloud Storage</p>
+      </div>
+      <form id="login-form" class="login-form" autocomplete="off">
+        <div class="form-group">
+          <label for="login-username"><i class="fa-solid fa-user"></i> Username</label>
+          <input type="text" id="login-username" placeholder="Enter username" autocomplete="username" required>
+        </div>
+        <div class="form-group">
+          <label for="login-password"><i class="fa-solid fa-lock"></i> Password</label>
+          <input type="password" id="login-password" placeholder="Enter password" autocomplete="current-password" required>
+        </div>
+        <p id="login-error" class="login-error hidden"></p>
+        <button type="submit" id="btn-login" class="btn btn-primary btn-block login-btn">
+          <i class="fa-solid fa-right-to-bracket"></i>
+          <span>Sign In</span>
+        </button>
+      </form>
+      <div class="login-footer">
+        <span>Secured by Armbian OS</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div id="settings-modal" class="modal-backdrop hidden">
+    <div class="modal-dialog settings-dialog">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-gear"></i> System Settings</h3>
+        <button class="btn-icon close-modal"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="settings-section">
+          <div class="settings-section-title">Storage Display</div>
+          <div class="settings-row">
+            <div class="settings-label">
+              <span>Hide System Root Storage (/)</span>
+              <small>System storage on SBC is usually small and not useful for file management.</small>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="setting-hide-root">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+        <div class="settings-section">
+          <div class="settings-section-title">Account Security</div>
+          <div class="settings-row">
+            <div class="settings-label">
+              <span>Change Password</span>
+              <small>Update your login credentials for enhanced security.</small>
+            </div>
+            <button id="btn-open-change-pw" class="btn btn-secondary btn-sm">
+              <i class="fa-solid fa-key"></i> Change
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="btn-save-settings" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Save Settings</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Change Password Modal -->
+  <div id="change-pw-modal" class="modal-backdrop hidden">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-key"></i> Change Password</h3>
+        <button class="btn-icon close-modal"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <form id="change-pw-form" class="login-form" autocomplete="off">
+          <div class="form-group">
+            <label for="pw-current">Current Password</label>
+            <input type="password" id="pw-current" placeholder="Enter current password" required>
+          </div>
+          <div class="form-group">
+            <label for="pw-new">New Password</label>
+            <input type="password" id="pw-new" placeholder="Enter new password (min 4 chars)" required minlength="4">
+          </div>
+          <div class="form-group">
+            <label for="pw-confirm">Confirm New Password</label>
+            <input type="password" id="pw-confirm" placeholder="Confirm new password" required minlength="4">
+          </div>
+          <p id="pw-error" class="login-error hidden"></p>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary close-modal">Cancel</button>
+        <button id="btn-submit-change-pw" class="btn btn-primary"><i class="fa-solid fa-check"></i> Update Password</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Scripts -->
   <script src="js/api.js"></script>

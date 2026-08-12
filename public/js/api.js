@@ -10,6 +10,17 @@ class CloudNestAPI {
   constructor() {
     this.baseUrl = '/api';
     this.chunkSize = 2 * 1024 * 1024; // 2MB Chunk default
+    this.token = localStorage.getItem('cloudnest_token') || '';
+    this.onUnauthorized = null;
+  }
+
+  setToken(token) {
+    this.token = token || '';
+    if (token) {
+      localStorage.setItem('cloudnest_token', token);
+    } else {
+      localStorage.removeItem('cloudnest_token');
+    }
   }
 
   /**
@@ -19,6 +30,10 @@ class CloudNestAPI {
     const url = `${this.baseUrl}${endpoint}`;
     const headers = options.headers || {};
     
+    if (this.token) {
+      headers['Authorization'] = `Bearer ${this.token}`;
+    }
+
     if (options.body && typeof options.body === 'object' && !(options.body instanceof FormData)) {
       headers['Content-Type'] = 'application/json';
       options.body = JSON.stringify(options.body);
@@ -27,6 +42,10 @@ class CloudNestAPI {
     const response = await fetch(url, { ...options, headers });
     
     if (!response.ok) {
+      if (response.status === 401 && this.onUnauthorized && !endpoint.includes('/auth/login')) {
+        this.onUnauthorized();
+      }
+
       let errorMsg = 'API Request Failed';
       try {
         const errJson = await response.json();
@@ -40,6 +59,51 @@ class CloudNestAPI {
     }
 
     return response.json();
+  }
+
+  // --- Auth Endpoints ---
+  async login(username, password) {
+    const res = await this.request('/auth/login', {
+      method: 'POST',
+      body: { username, password }
+    });
+    if (res.token) {
+      this.setToken(res.token);
+    }
+    return res;
+  }
+
+  async logout() {
+    try {
+      await this.request('/auth/logout', { method: 'POST' });
+    } catch (e) {
+      // Ignore logout errors
+    } finally {
+      this.setToken('');
+    }
+  }
+
+  async getMe() {
+    return this.request('/auth/me');
+  }
+
+  async changePassword(currentPassword, newPassword) {
+    return this.request('/auth/change-password', {
+      method: 'POST',
+      body: { currentPassword, newPassword }
+    });
+  }
+
+  // --- Settings Endpoints ---
+  async getSettings() {
+    return this.request('/settings');
+  }
+
+  async updateSettings(settings) {
+    return this.request('/settings', {
+      method: 'POST',
+      body: settings
+    });
   }
 
   // --- Storage Drives ---
