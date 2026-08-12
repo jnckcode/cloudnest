@@ -396,3 +396,52 @@
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-10px); }
 }
+
+/* Responsive Component Overrides */
+@media (max-width: 640px) {
+  .file-container.grid-view {
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 0.75rem;
+  }
+
+  .file-card {
+    padding: 0.75rem 0.5rem;
+  }
+
+  .file-icon-wrapper {
+    font-size: 2rem;
+    height: 42px;
+  }
+
+  .modal-backdrop {
+    padding: 0.75rem;
+  }
+
+  .modal-dialog {
+    max-width: 100%;
+    border-radius: var(--radius-md);
+  }
+
+  .modal-dialog.preview-dialog {
+    height: 88vh;
+    max-width: 100%;
+  }
+
+  .upload-drawer {
+    width: calc(100vw - 1.5rem);
+    left: 0.75rem;
+    right: 0.75rem;
+    bottom: 0.75rem;
+  }
+
+  .toast-container {
+    left: 0.75rem;
+    right: 0.75rem;
+    bottom: 0.75rem;
+  }
+
+  .toast {
+    width: 100%;
+  }
+}
+

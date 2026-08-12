@@ -367,6 +367,33 @@ body {
   box-shadow: 0 0 8px var(--accent-emerald);
 }
 
+/* Mobile Visibility Utilities */
+.mobile-only {
+  display: none !important;
+}
+
+.mobile-only-inline {
+  display: none !important;
+}
+
+/* Sidebar Overlay (Backdrop for Mobile Drawer) */
+.sidebar-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 90;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
 /* Scrollbar Customization */
 ::-webkit-scrollbar {
   width: 8px;
@@ -382,3 +409,92 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.3);
 }
+
+/* Responsive Layout Rules */
+@media (max-width: 768px) {
+  .mobile-only {
+    display: inline-flex !important;
+  }
+
+  .mobile-only-inline {
+    display: inline-flex !important;
+    margin-left: auto;
+  }
+
+  .app-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 285px;
+    max-width: 85vw;
+    z-index: 100;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
+    box-shadow: none;
+    overflow-y: auto;
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+    box-shadow: 10px 0 30px rgba(0, 0, 0, 0.8);
+  }
+
+  .top-bar {
+    padding: 0 0.85rem;
+    gap: 0.5rem;
+  }
+
+  .top-bar-controls {
+    gap: 0.35rem;
+  }
+
+  .search-box {
+    width: 140px;
+  }
+
+  .breadcrumb-container {
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .status-bar {
+    padding: 0 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .viewport-area {
+    padding: 0.75rem;
+  }
+
+  .top-bar {
+    padding: 0 0.5rem;
+  }
+
+  .search-box {
+    width: 110px;
+  }
+
+  .search-box input {
+    padding: 0.35rem 0.5rem 0.35rem 1.8rem;
+    font-size: 0.75rem;
+  }
+
+  .btn-icon {
+    width: 34px;
+    height: 34px;
+  }
+
+  .breadcrumb-container {
+    max-width: 95px;
+    font-size: 0.8rem;
+  }
+}
+

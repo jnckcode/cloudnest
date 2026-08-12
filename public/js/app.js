@@ -20,9 +20,60 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => toast.remove(), 3500);
   }
 
+  // --- Mobile Sidebar Drawer Controller ---
+  const sidebar = document.getElementById('sidebar');
+  const sidebarOverlay = document.getElementById('sidebar-overlay');
+  const btnToggleSidebar = document.getElementById('btn-toggle-sidebar');
+  const btnCloseSidebar = document.getElementById('btn-close-sidebar');
+
+  function openSidebar() {
+    if (sidebar) sidebar.classList.add('open');
+    if (sidebarOverlay) sidebarOverlay.classList.add('active');
+  }
+
+  function closeSidebar() {
+    if (sidebar) sidebar.classList.remove('open');
+    if (sidebarOverlay) sidebarOverlay.classList.remove('active');
+  }
+
+  function toggleSidebar() {
+    if (sidebar && sidebar.classList.contains('open')) {
+      closeSidebar();
+    } else {
+      openSidebar();
+    }
+  }
+
+  if (btnToggleSidebar) btnToggleSidebar.addEventListener('click', toggleSidebar);
+  if (btnCloseSidebar) btnCloseSidebar.addEventListener('click', closeSidebar);
+  if (sidebarOverlay) sidebarOverlay.addEventListener('click', closeSidebar);
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && sidebar && sidebar.classList.contains('open')) {
+      closeSidebar();
+    }
+  });
+
+  document.querySelectorAll('.sidebar-nav .nav-item').forEach(navLink => {
+    navLink.addEventListener('click', () => {
+      if (window.innerWidth <= 768) {
+        closeSidebar();
+      }
+    });
+  });
+
+  window.addEventListener('resize', () => {
+    if (window.innerWidth > 768) {
+      closeSidebar();
+    }
+  });
+
   // --- Initialize Components ---
   const storageSidebar = new StorageSidebar('storage-drives-list', (drivePath) => {
     loadDirectory(drivePath);
+    if (window.innerWidth <= 768) {
+      closeSidebar();
+    }
   });
 
   const previewModal = new PreviewModal(
@@ -234,6 +285,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // New Folder Creation
   document.getElementById('btn-new-folder').addEventListener('click', async () => {
+    if (window.innerWidth <= 768) closeSidebar();
     const name = prompt('New Folder Name:');
     if (name) {
       try {
@@ -248,7 +300,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Upload File Picker Trigger
   const fileInput = document.getElementById('hidden-file-input');
-  document.getElementById('btn-upload').addEventListener('click', () => fileInput.click());
+  document.getElementById('btn-upload').addEventListener('click', () => {
+    if (window.innerWidth <= 768) closeSidebar();
+    fileInput.click();
+  });
 
   fileInput.addEventListener('change', (e) => {
     if (e.target.files && e.target.files.length > 0) {
