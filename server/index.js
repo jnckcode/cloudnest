@@ -77,9 +77,14 @@ app.use((err, req, res, next) => {
   });
 });
 
+const { runMigrations } = require('./db');
+
 // Start listening with Auto-Port Detection
 findAvailablePort(PORT)
-  .then((actualPort) => {
+  .then(async (actualPort) => {
+    // Run automated DB migrations on startup
+    await runMigrations();
+
     app.listen(actualPort, () => {
       console.log(`
   =============================================================
