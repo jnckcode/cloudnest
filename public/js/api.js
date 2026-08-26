@@ -164,6 +164,16 @@ class CloudNestAPI {
     });
   }
 
+  getDownloadUrl(targetPath) {
+    const encodedPath = encodeURIComponent(targetPath || '');
+    return `${this.baseUrl}/files/download?path=${encodedPath}${this.token ? `&token=${encodeURIComponent(this.token)}` : ''}`;
+  }
+
+  getPreviewUrl(targetPath) {
+    const encodedPath = encodeURIComponent(targetPath || '');
+    return `${this.baseUrl}/files/preview?path=${encodedPath}${this.token ? `&token=${encodeURIComponent(this.token)}` : ''}`;
+  }
+
   // --- Chunked Upload Algorithm with Resume Support ---
   async uploadFileChunked(file, targetPath, { onProgress, abortSignal }) {
     const totalSize = file.size;

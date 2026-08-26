@@ -209,7 +209,7 @@ document.addEventListener('DOMContentLoaded', () => {
         break;
 
       case 'download':
-        window.open(`/api/files/download?path=${encodeURIComponent(item.path)}`, '_blank');
+        window.open(api.getDownloadUrl(item.path), '_blank');
         break;
 
       case 'share':

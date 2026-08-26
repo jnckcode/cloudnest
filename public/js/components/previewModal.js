@@ -2,7 +2,7 @@
  * @file public/js/components/previewModal.js
  * @description Universal media viewer component for playing Video/Audio streams, viewing Code/Text, rendering Images, and loading PDF documents.
  * @module PreviewModalComponent
- * @dependencies none
+ * @dependencies api
  * @author Agent Architecture Directive
  */
 
@@ -29,7 +29,7 @@ class PreviewModal {
 
     this.downloadBtn.addEventListener('click', () => {
       if (this.currentPath) {
-        window.open(`/api/files/download?path=${encodeURIComponent(this.currentPath)}`, '_blank');
+        window.open(api.getDownloadUrl(this.currentPath), '_blank');
       }
     });
   }
@@ -40,7 +40,8 @@ class PreviewModal {
     this.body.innerHTML = '<div style="color: #fff; padding: 2rem;">Loading media player...</div>';
     this.modal.classList.remove('hidden');
 
-    const previewUrl = `/api/files/preview?path=${encodeURIComponent(item.path)}`;
+    const previewUrl = api.getPreviewUrl(item.path);
+    const downloadUrl = api.getDownloadUrl(item.path);
     const mime = (item.mimeType || '').toLowerCase();
     const ext = (item.extension || '').toLowerCase();
 
@@ -85,6 +86,9 @@ class PreviewModal {
     if (mime.startsWith('text/') || mime.includes('javascript') || mime.includes('json') || ['js','html','css','py','sh','json','txt','md','c','cpp','cs','go','rs'].includes(ext.replace('.',''))) {
       try {
         const response = await fetch(previewUrl);
+        if (!response.ok) {
+          throw new Error(`Failed to load file (${response.status})`);
+        }
         const codeText = await response.text();
         const escapedText = codeText.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
         this.body.innerHTML = `<pre class="preview-code-block"><code>${escapedText}</code></pre>`;
@@ -99,7 +103,7 @@ class PreviewModal {
       <div style="text-align: center; color: #94a3b8; padding: 3rem;">
         <i class="fa-solid fa-file-circle-exclamation" style="font-size: 3rem; margin-bottom: 1rem;"></i>
         <p>Preview not supported for this file type.</p>
-        <button class="btn btn-primary" style="margin-top: 1rem;" onclick="window.open('${previewUrl}', '_blank')">
+        <button class="btn btn-primary" style="margin-top: 1rem;" onclick="window.open('${downloadUrl}', '_blank')">
           Download File
         </button>
       </div>
