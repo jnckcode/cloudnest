@@ -147,7 +147,7 @@ sudo -E env "PATH=$PATH" ./deploy-armbian.sh
 **What the script does:**
 
 1. Validates that `node` and `npm` are available in PATH
-2. Installs system dependency (`sqlite3`)
+2. Installs system dependencies (`sqlite3`, `build-essential`)
 3. Copies project to `/opt/cloudnest` (skipped if already there)
 4. Installs production npm dependencies
 5. Creates storage directory at `/var/cloudnest/storage`
@@ -180,7 +180,7 @@ CloudNest is configured via **environment variables**:
   <tr>
     <td align="center"><img src="https://img.icons8.com/color/48/nodejs.png" width="30"/><br/><sub>Node.js</sub></td>
     <td align="center"><img src="https://img.icons8.com/ios/50/FFFFFF/express-js.png" width="30"/><br/><sub>Express</sub></td>
-    <td align="center"><img src="https://img.icons8.com/color/48/sql.png" width="30"/><br/><sub>SQLite3</sub></td>
+    <td align="center"><img src="https://img.icons8.com/color/48/sql.png" width="30"/><br/><sub>better-sqlite3</sub></td>
     <td align="center"><img src="https://img.icons8.com/color/48/html-5--v1.png" width="30"/><br/><sub>HTML5</sub></td>
     <td align="center"><img src="https://img.icons8.com/color/48/css3.png" width="30"/><br/><sub>CSS3</sub></td>
     <td align="center"><img src="https://img.icons8.com/color/48/javascript--v1.png" width="30"/><br/><sub>JavaScript</sub></td>
