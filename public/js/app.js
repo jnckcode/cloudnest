@@ -11,13 +11,25 @@ document.addEventListener('DOMContentLoaded', () => {
   let rawFilesList = [];
 
   // --- UI Toast Helper ---
-  function showToast(message, type = 'info') {
+  function showToast(message, type = 'info', duration = 3500) {
     const container = document.getElementById('toast-container');
+    if (!container) return;
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
-    toast.innerHTML = `<i class="fa-solid ${type === 'error' ? 'fa-triangle-exclamation' : 'fa-circle-check'}"></i> ${message}`;
+
+    let iconClass = 'fa-circle-info';
+    if (type === 'success') iconClass = 'fa-circle-check';
+    else if (type === 'error') iconClass = 'fa-triangle-exclamation';
+    else if (type === 'warning') iconClass = 'fa-circle-exclamation';
+
+    toast.innerHTML = `<i class="fa-solid ${iconClass}"></i> <span>${message}</span>`;
     container.appendChild(toast);
-    setTimeout(() => toast.remove(), 3500);
+
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateY(10px) scale(0.95)';
+      setTimeout(() => toast.remove(), 200);
+    }, duration);
   }
 
   // --- Mobile Sidebar Drawer Controller ---
@@ -223,18 +235,80 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         break;
 
-      case 'rename':
-        const newName = prompt('Enter new name:', item.name);
-        if (newName && newName !== item.name) {
+      case 'rename': {
+        const newName = await ModalDialog.prompt({
+          title: `Rename ${item.isDirectory ? 'Folder' : 'File'}`,
+          message: `Enter a new name for <strong>${ModalDialog.escapeHtml(item.name)}</strong>:`,
+          defaultValue: item.name,
+          placeholder: 'Enter new name...',
+          icon: 'fa-pen-to-square',
+          confirmText: 'Rename',
+          confirmIcon: 'fa-check',
+          validator: (val) => {
+            const trimmed = val ? val.trim() : '';
+            if (!trimmed) return 'Name cannot be empty';
+            if (/[/\\?%*:|"<>]/g.test(trimmed)) return 'Name contains invalid characters (/ \\ ? % * : | " < >)';
+            return null;
+          }
+        });
+
+        if (newName && newName.trim() !== item.name) {
           try {
-            await api.renameItem(item.path, newName);
-            showToast('Renamed successfully');
+            await api.renameItem(item.path, newName.trim());
+            showToast(`Renamed to "${newName.trim()}"`, 'success');
             loadDirectory(currentPath);
           } catch (err) {
             showToast(err.message, 'error');
           }
         }
         break;
+      }
+
+      case 'copy': {
+        const destination = await ModalDialog.prompt({
+          title: `Copy ${item.isDirectory ? 'Folder' : 'File'}`,
+          message: `Copy <strong>${ModalDialog.escapeHtml(item.name)}</strong> to folder path:`,
+          defaultValue: currentPath,
+          placeholder: 'Destination folder relative path (leave blank for root)...',
+          icon: 'fa-copy',
+          confirmText: 'Copy Here',
+          confirmIcon: 'fa-copy'
+        });
+
+        if (destination !== null) {
+          try {
+            await api.copyItem(item.path, destination.trim());
+            showToast(`"${item.name}" copied successfully`, 'success');
+            loadDirectory(currentPath);
+          } catch (err) {
+            showToast(err.message, 'error');
+          }
+        }
+        break;
+      }
+
+      case 'move': {
+        const destination = await ModalDialog.prompt({
+          title: `Move ${item.isDirectory ? 'Folder' : 'File'}`,
+          message: `Move <strong>${ModalDialog.escapeHtml(item.name)}</strong> to folder path:`,
+          defaultValue: currentPath,
+          placeholder: 'Destination folder relative path (leave blank for root)...',
+          icon: 'fa-file-export',
+          confirmText: 'Move Here',
+          confirmIcon: 'fa-file-export'
+        });
+
+        if (destination !== null) {
+          try {
+            await api.moveItem(item.path, destination.trim());
+            showToast(`"${item.name}" moved successfully`, 'success');
+            loadDirectory(currentPath);
+          } catch (err) {
+            showToast(err.message, 'error');
+          }
+        }
+        break;
+      }
 
       case 'properties':
         try {
@@ -251,17 +325,28 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         break;
 
-      case 'delete':
-        if (confirm(`Are you sure you want to delete "${item.name}"?`)) {
+      case 'delete': {
+        const confirmed = await ModalDialog.confirm({
+          title: `Delete ${item.isDirectory ? 'Folder' : 'File'}`,
+          message: `Are you sure you want to delete <strong>${ModalDialog.escapeHtml(item.name)}</strong>?${item.isDirectory ? '<br><small style="color:var(--text-dim); display:inline-block; margin-top:4px;">All nested contents will be permanently deleted.</small>' : ''}`,
+          icon: 'fa-trash-can',
+          confirmText: 'Delete Permanently',
+          confirmIcon: 'fa-trash-can',
+          cancelText: 'Cancel',
+          danger: true
+        });
+
+        if (confirmed) {
           try {
             await api.deleteItem(item.path);
-            showToast('Item deleted');
+            showToast(`"${item.name}" deleted successfully`, 'success');
             loadDirectory(currentPath);
           } catch (err) {
             showToast(err.message, 'error');
           }
         }
         break;
+      }
     }
   }
 
@@ -286,11 +371,25 @@ document.addEventListener('DOMContentLoaded', () => {
   // New Folder Creation
   document.getElementById('btn-new-folder').addEventListener('click', async () => {
     if (window.innerWidth <= 768) closeSidebar();
-    const name = prompt('New Folder Name:');
-    if (name) {
+    const name = await ModalDialog.prompt({
+      title: 'Create New Folder',
+      message: 'Enter a name for the new folder:',
+      placeholder: 'e.g. Documents, Projects, Photos...',
+      icon: 'fa-folder-plus',
+      confirmText: 'Create Folder',
+      confirmIcon: 'fa-plus',
+      validator: (val) => {
+        const trimmed = val ? val.trim() : '';
+        if (!trimmed) return 'Folder name cannot be empty';
+        if (/[/\\?%*:|"<>]/g.test(trimmed)) return 'Folder name contains invalid characters (/ \\ ? % * : | " < >)';
+        return null;
+      }
+    });
+
+    if (name && name.trim()) {
       try {
-        await api.createDirectory(currentPath, name);
-        showToast('Folder created');
+        await api.createDirectory(currentPath, name.trim());
+        showToast(`Folder "${name.trim()}" created successfully`, 'success');
         loadDirectory(currentPath);
       } catch (err) {
         showToast(err.message, 'error');
@@ -383,9 +482,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Logout Button
   document.getElementById('btn-logout').addEventListener('click', async () => {
-    if (confirm('Are you sure you want to sign out?')) {
+    const confirmed = await ModalDialog.confirm({
+      title: 'Sign Out',
+      message: 'Are you sure you want to end your current session?',
+      icon: 'fa-right-from-bracket',
+      confirmText: 'Sign Out',
+      confirmIcon: 'fa-right-from-bracket',
+      cancelText: 'Stay Signed In',
+      danger: true
+    });
+
+    if (confirmed) {
       await api.logout();
-      showToast('Signed out successfully');
+      showToast('Signed out successfully', 'info');
       showLoginScreen();
     }
   });

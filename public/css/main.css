@@ -173,6 +173,19 @@ body {
   border-color: rgba(255, 255, 255, 0.2);
 }
 
+.btn-danger {
+  background: linear-gradient(135deg, var(--accent-rose), #e11d48);
+  color: #fff;
+  border-color: rgba(244, 63, 94, 0.4);
+  box-shadow: 0 4px 14px rgba(244, 63, 94, 0.35);
+}
+
+.btn-danger:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(244, 63, 94, 0.55);
+  background: linear-gradient(135deg, #fb7185, #e11d48);
+}
+
 .btn-icon {
   width: 36px;
   height: 36px;

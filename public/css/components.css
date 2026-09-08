@@ -362,29 +362,231 @@
 /* Toast Notifications */
 .toast-container {
   position: fixed;
-  bottom: 1rem;
-  left: 1rem;
+  bottom: 1.25rem;
+  left: 1.25rem;
   z-index: 1000;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.6rem;
+  pointer-events: none;
 }
 
 .toast {
-  background: var(--bg-surface);
+  pointer-events: auto;
+  background: rgba(15, 23, 42, 0.92);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   border: 1px solid var(--border-color);
   border-left: 4px solid var(--primary);
-  border-radius: var(--radius-sm);
-  padding: 0.65rem 1rem;
-  font-size: 0.825rem;
+  border-radius: var(--radius-md);
+  padding: 0.75rem 1.15rem;
+  font-size: 0.85rem;
+  font-weight: 500;
   color: var(--text-main);
-  box-shadow: var(--shadow-lg);
-  animation: slideIn 0.2s ease;
+  box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  animation: toastSlideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.2s ease;
 }
 
-@keyframes slideIn {
-  from { transform: translateX(-100%); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
+.toast.success {
+  border-left-color: var(--accent-emerald);
+}
+.toast.success i {
+  color: var(--accent-emerald);
+}
+
+.toast.error {
+  border-left-color: var(--accent-rose);
+}
+.toast.error i {
+  color: var(--accent-rose);
+}
+
+.toast.warning {
+  border-left-color: var(--accent-amber);
+}
+.toast.warning i {
+  color: var(--accent-amber);
+}
+
+.toast.info {
+  border-left-color: var(--primary);
+}
+.toast.info i {
+  color: #818cf8;
+}
+
+/* Custom Glassmorphic Modal Dialogs (Confirm / Prompt / Alert) */
+.custom-dialog-backdrop {
+  z-index: 2500;
+  animation: backdropFadeIn 0.2s ease;
+}
+
+.custom-dialog-backdrop.dialog-closing {
+  animation: backdropFadeOut 0.2s ease forwards;
+}
+
+.custom-dialog-card {
+  background: linear-gradient(145deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.98));
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-xl);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  max-width: 460px;
+  width: 100%;
+  animation: dialogPopIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+.dialog-closing .custom-dialog-card {
+  animation: dialogPopOut 0.18s ease forwards;
+}
+
+.custom-dialog-card.dialog-danger {
+  border-top: 2px solid var(--accent-rose);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.75), 0 0 30px rgba(244, 63, 94, 0.15);
+}
+
+.custom-dialog-body {
+  display: flex;
+  gap: 1.25rem;
+  padding: 1.75rem 1.75rem 1.25rem;
+  align-items: flex-start;
+}
+
+.custom-dialog-icon-wrapper {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-lg);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+}
+
+.custom-dialog-icon-wrapper.icon-primary {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(6, 182, 212, 0.15));
+  border: 1px solid rgba(99, 102, 241, 0.35);
+  color: #818cf8;
+}
+
+.custom-dialog-icon-wrapper.icon-danger {
+  background: linear-gradient(135deg, rgba(244, 63, 94, 0.22), rgba(225, 29, 72, 0.15));
+  border: 1px solid rgba(244, 63, 94, 0.4);
+  color: #fb7185;
+  box-shadow: 0 0 20px rgba(244, 63, 94, 0.25);
+}
+
+.custom-dialog-icon-wrapper.icon-success {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(5, 150, 105, 0.15));
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  color: #34d399;
+}
+
+.custom-dialog-icon-wrapper.icon-warning {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(217, 119, 6, 0.15));
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  color: #fbbf24;
+}
+
+.custom-dialog-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.custom-dialog-title {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 0.4rem;
+  line-height: 1.3;
+}
+
+.custom-dialog-message {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.custom-dialog-message strong {
+  color: var(--text-main);
+  word-break: break-word;
+}
+
+.custom-dialog-input-wrap {
+  margin-top: 1rem;
+}
+
+.custom-dialog-input {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-md);
+  padding: 0.75rem 1rem;
+  color: var(--text-main);
+  font-size: 0.9rem;
+  outline: none;
+  transition: all 0.15s ease;
+}
+
+.custom-dialog-input:focus {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-glow);
+}
+
+.custom-dialog-input.input-invalid {
+  border-color: var(--accent-rose);
+  box-shadow: 0 0 0 3px rgba(244, 63, 94, 0.2);
+}
+
+.custom-dialog-error {
+  font-size: 0.8rem;
+  color: var(--accent-rose);
+  margin-top: 0.4rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-sm);
+  background: rgba(244, 63, 94, 0.1);
+}
+
+.custom-dialog-footer {
+  padding: 0.75rem 1.75rem 1.5rem;
+  background: transparent;
+  border-top: none;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+@keyframes toastSlideIn {
+  from { transform: translateY(20px) scale(0.95); opacity: 0; }
+  to { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+@keyframes backdropFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes backdropFadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes dialogPopIn {
+  0% { transform: scale(0.92) translateY(10px); opacity: 0; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+@keyframes dialogPopOut {
+  0% { transform: scale(1) translateY(0); opacity: 1; }
+  100% { transform: scale(0.94) translateY(10px); opacity: 0; }
 }
 
 @keyframes fadeIn {
