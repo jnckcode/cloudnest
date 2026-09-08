@@ -160,6 +160,17 @@ sudo systemctl restart cloudnest
 sudo journalctl -u cloudnest -f    # Live logs
 ```
 
+### 🗑️ Complete Uninstallation
+
+To completely and cleanly remove CloudNest (service, app files, node modules, database, env, and all storage data without leftover traces):
+
+```bash
+sudo chmod +x uninstall-armbian.sh
+sudo ./uninstall-armbian.sh
+```
+
+> You can also run `sudo ./uninstall-armbian.sh -y` for non-interactive execution.
+
 ---
 
 ## 🔧 Configuration
