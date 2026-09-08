@@ -49,7 +49,7 @@ SERVICE_NAME="cloudnest.service"
 echo ""
 echo "Step 1: Installing System Dependencies..."
 apt-get update -y
-apt-get install -y sqlite3
+apt-get install -y sqlite3 build-essential
 
 # ─── Step 2: Prepare application directory ────────────────────────
 echo ""
